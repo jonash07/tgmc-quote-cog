@@ -186,7 +186,7 @@ class QuoteDB(commands.Cog):
 
         guild_group = self.config.guild(ctx.guild)
 
-        async with guild_group.quotes.spam_channels() as spam_channels:
+        async with guild_group.spam_channels() as spam_channels:
             if ctx.channel.id in spam_channels:
                 await ctx.send(f"{ctx.channel.name} is already set as a spam channel.")
                 return
@@ -207,7 +207,7 @@ class QuoteDB(commands.Cog):
 
         guild_group = self.config.guild(ctx.guild)
 
-        async with guild_group.quotes.spam_channels() as spam_channels:
+        async with guild_group.spam_channels() as spam_channels:
             if ctx.channel.id not in spam_channels:
                 await ctx.send(f"{ctx.channel.name} is not set as a spam channel.")
                 return
@@ -220,7 +220,7 @@ class QuoteDB(commands.Cog):
     @commands.guild_only()
     @commands.command(name="tdel")
     async def quote_mass_del(self, ctx, *, trigger: str):
-        'Mass delete quotes in a trigger'
+        'Mass delete quotes in a trigger (category)'
 
         if not ctx.author.guild_permissions.manage_messages:
             await ctx.send(f"{ctx.author.mention}, only admins can use this command.")
@@ -263,7 +263,7 @@ class QuoteDB(commands.Cog):
 
         guild_group = self.config.guild(ctx.guild)
 
-        async with guild_group.quotes.banlist() as banlist:
+        async with guild_group.banlist() as banlist:
             if mention_id in banlist:
                 await ctx.send("User is already banned.")
                 return
@@ -290,7 +290,7 @@ class QuoteDB(commands.Cog):
 
         guild_group = self.config.guild(ctx.guild)
 
-        async with guild_group.quotes.banlist() as banlist:
+        async with guild_group.banlist() as banlist:
             if mention_id not in banlist:
                 await ctx.send("User is not banned.")
                 return

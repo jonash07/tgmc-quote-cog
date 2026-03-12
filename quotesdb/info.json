@@ -1,5 +1,5 @@
 {
-    "author": ["Jonashx"],
+    "author": ["jonash07"],
     "name": "Quotes DB",
     "short": "Storage for user generated quotes",
     "description": "Allow uses to specify quotes paired with a trigger.",
