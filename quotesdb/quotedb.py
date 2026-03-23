@@ -134,7 +134,7 @@ class QuoteDB(commands.Cog):
         quote_id = random.choice(triggers)
 
         quotes = await guild_group.quotes.id()
-        quote = quotes[str(quote_id)]['content']
+        quote = quotes[str(quote_id)]["content"]
         await ctx.send(f"`#{quote_id}` :mega: {quote}")
 
 
@@ -151,10 +151,15 @@ class QuoteDB(commands.Cog):
                 return
 
             data = quotes[qid]
-            member = discord.utils.find(lambda m: m.id == data['user'], ctx.channel.guild.members)
+
+            # bandaid fix cause some user ids are strings, some are ints and some dont even exist
+            if data["user"] != "":
+                member = discord.utils.find(lambda m: m.id == int(data["user"]), ctx.channel.guild.members)
+            else:
+                member = None
 
             if ctx.author == member or ctx.author.guild_permissions.manage_messages:
-                trigger = data['trigger']
+                trigger = data["trigger"]
                 del quotes[qid]
                 trigger_data[trigger].remove(qid)
 
@@ -178,18 +183,22 @@ class QuoteDB(commands.Cog):
 
         data = quotes[qid]
 
-        member = discord.utils.find(lambda m: m.id == data['user'], ctx.channel.guild.members)
+        # bandaid fix cause some user ids are strings, some are ints and some dont even exist
+        if data["user"] != "":
+            member = discord.utils.find(lambda m: m.id == int(data["user"]), ctx.channel.guild.members)
+        else:
+            member = None
 
         log = discord.Embed()
         log.type = "rich"
 
-        log.set_author(name=member, url=data['jump_url'])
+        log.set_author(name=member, url=data["jump_url"])
         log.title = f"Quote Info - #{qid}"
 
-        created_at = datetime.datetime.fromtimestamp(data['datetime'])
+        created_at = datetime.datetime.fromtimestamp(data["datetime"])
         log.add_field(
-            name=f"{data['trigger']}",
-            value=f"{data['content']}",
+            name=f"{data["trigger"]}",
+            value=f"{data["content"]}",
             inline=False
         )
         log.add_field(
@@ -270,6 +279,43 @@ class QuoteDB(commands.Cog):
                 del quotes[qid]
 
             del trigger_data[trigger]
+
+        await ctx.send(f"{ctx.author.mention} deleted {quote_amount} quote(s).")
+
+
+    @commands.guild_only()
+    @commands.command(name="adel")
+    async def author_quote_del(self, ctx, *, user_mention: str):
+        'Mass delete quotes that a user added'
+
+        if not ctx.author.guild_permissions.manage_messages:
+            await ctx.send(f"{ctx.author.mention}, only admins can use this command.")
+            return
+
+        if len(ctx.message.raw_mentions) != 1:
+            await ctx.send("Invalid use of command.")
+            return
+
+        mention_id = ctx.message.raw_mentions[0]
+
+        guild_group = self.config.guild(ctx.guild)
+
+        quote_amount = 0
+
+        async with guild_group.quotes.id() as quotes, guild_group.quotes.trigger() as trigger_data:
+            quote_ids = [x for x in quotes]
+
+            for qid in quote_ids:
+
+                # bandaid fix cause some user ids are string, some are ints and some dont even exist
+                if str(quotes[qid]["user"]) != str(mention_id):
+                    continue
+
+                trigger = quotes[qid]["trigger"]
+
+                del quotes[qid]
+                trigger_data[trigger].remove(qid)
+                quote_amount += 1
 
         await ctx.send(f"{ctx.author.mention} deleted {quote_amount} quote(s).")
 
