@@ -197,8 +197,8 @@ class QuoteDB(commands.Cog):
 
         created_at = datetime.datetime.fromtimestamp(data["datetime"])
         log.add_field(
-            name=f"{data["trigger"]}",
-            value=f"{data["content"]}",
+            name=f"{data['trigger']}",
+            value=f"{data['content']}",
             inline=False
         )
         log.add_field(
